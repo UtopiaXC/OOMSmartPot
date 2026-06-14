@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Planter IoT System - Backend API Documentation</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #333333;
+            display: flex;
+            background-color: #f8f9fa;
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: #ffffff;
+            border-right: 1px solid #e9ecef;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            overflow-y: auto;
+            padding: 20px 0;
+        }
+
+        .sidebar-title {
+            padding: 0 25px 20px 25px;
+            font-size: 18px;
+            font-weight: 700;
+            border-bottom: 1px solid #e9ecef;
+            margin-bottom: 15px;
+            color: #1a73e8;
+        }
+
+        .nav-group-title {
+            padding: 10px 25px 5px 25px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #70757a;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 25px;
+            color: #495057;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .nav-item:hover {
+            background-color: #f1f3f4;
+            color: #202124;
+        }
+
+        .nav-item.active {
+            background-color: #e8f0fe;
+            color: #1a73e8;
+            font-weight: 600;
+        }
+
+        .nav-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-right: 8px;
+            color: #ffffff;
+            text-transform: uppercase;
+            width: 38px;
+            text-align: center;
+        }
+
+        .badge-get { background-color: #1e8e3e; }
+        .badge-post { background-color: #1a73e8; }
+        .badge-put { background-color: #f9ab00; }
+
+        .main-content {
+            flex: 1;
+            padding: 40px 60px;
+            max-width: 1000px;
+            background-color: #ffffff;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #202124;
+        }
+
+        .doc-description {
+            color: #5f6368;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            font-size: 22px;
+            margin-top: 50px;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e8eaed;
+            color: #202124;
+        }
+
+        h3 {
+            font-size: 18px;
+            margin-top: 35px;
+            margin-bottom: 15px;
+            color: #202124;
+        }
+
+        p {
+            line-height: 1.6;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #3c4043;
+        }
+
+        ul {
+            line-height: 1.6;
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #3c4043;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .api-endpoint-block {
+            background-color: #f8f9fa;
+            border: 1px solid #dadce0;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .api-method {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-right: 15px;
+            text-transform: uppercase;
+        }
+
+        .api-method.method-get { background-color: #1e8e3e; }
+        .api-method.method-post { background-color: #1a73e8; }
+        .api-method.method-put { background-color: #f9ab00; }
+
+        .api-path {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 15px;
+            font-weight: 600;
+            color: #202124;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #dadce0;
+            padding: 10px 14px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #202124;
+        }
+
+        td {
+            color: #3c4043;
+        }
+
+        .table-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #202124;
+            margin-top: 20px;
+            margin-bottom: 5px;
+        }
+
+        pre {
+            background-color: #202124;
+            color: #f1f3f4;
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-top: 10px;
+            margin-bottom: 25px;
+        }
+
+        code {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            background-color: #f1f3f4;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #d93025;
+        }
+
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            color: inherit;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-title">Smart Planter API</div>
+
+    <a href="#global-conventions" class="nav-item">Global Conventions</a>
+
+    <div class="nav-group-title">Sensors</div>
+    <a href="#get-sensors-current" class="nav-item"><span class="nav-badge badge-get">GET</span>Current Readings</a>
+
+    <div class="nav-group-title">Actuator Control</div>
+    <a href="#post-pump-action" class="nav-item"><span class="nav-badge badge-post">POST</span>Watering Action</a>
+    <a href="#get-pump-status" class="nav-item"><span class="nav-badge badge-get">GET</span>Pump Status</a>
+    <a href="#post-pump-stop" class="nav-item"><span class="nav-badge badge-post">POST</span>Emergency Stop</a>
+
+    <div class="nav-group-title">AI &amp; Schedule</div>
+    <a href="#post-ai-trigger" class="nav-item"><span class="nav-badge badge-post">POST</span>Trigger AI Analysis</a>
+    <a href="#get-schedule-upcoming" class="nav-item"><span class="nav-badge badge-get">GET</span>Upcoming Schedule</a>
+    <a href="#get-schedule-history" class="nav-item"><span class="nav-badge badge-get">GET</span>Execution History</a>
+    <a href="#get-ai-suggestions" class="nav-item"><span class="nav-badge badge-get">GET</span>AI Suggestions</a>
+
+    <div class="nav-group-title">Configuration</div>
+    <a href="#get-system-config" class="nav-item"><span class="nav-badge badge-get">GET</span>Get Configuration</a>
+    <a href="#put-system-config" class="nav-item"><span class="nav-badge badge-put">PUT</span>Update Configuration</a>
+
+    <div class="nav-group-title">Camera Stream</div>
+    <a href="#get-camera-stream" class="nav-item"><span class="nav-badge badge-get">GET</span>Live Video Stream</a>
+</div>
+
+<div class="main-content">
+    <h1>Smart Planter System Backend API Documentation</h1>
+    <div class="doc-description">
+        This document defines the RESTful and streaming API specifications for the Smart Planter system backend controller deployed on Raspberry Pi 4. It provides endpoints for sensor data retrieval, pump hardware execution, automated AI workflow scheduling, system configuration management, and live MJPEG video streaming.
+    </div>
+
+    <section id="global-conventions">
+        <h2>1. Global Conventions</h2>
+        <ul>
+            <li><strong>Base URL:</strong> <code>http://&lt;pi-ip-address&gt;:&lt;port&gt;</code></li>
+            <li><strong>Data Format:</strong> All request and response bodies must use the <code>application/json</code> media type.</li>
+            <li><strong>Time Format:</strong> All timestamps adhere strictly to the ISO 8601 extended format in UTC (e.g., <code>2026-06-14T06:00:00Z</code>).</li>
+        </ul>
+    </section>
+
+    <section id="get-sensors-current">
+        <h2>2. Sensor Data Endpoints</h2>
+        <h3>2.1 Get Current Sensor Readings</h3>
+        <p>Retrieves the latest physical telemetry data collected from the onboard temperature, atmospheric pressure, and soil moisture hardware modules connected to the Raspberry Pi 4.</p>
+
+        <div class="api-endpoint-block">
+            <span class="api-method method-get">GET</span>
+            <span class="api-path">/api/v1/sensors/current</span>
+        </div>
+
+        <div class="table-title">Response Fields</div>
+        <table>
+            <thead>
+            <tr>
+                <th>Field Name</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>timestamp</td>
+                <td>String</td>
+                <td>The exact UTC time when the sensor payload was gathered.</td>
+            </tr>
+            <tr>
+                <td>temperature_celsius</td>
+                <td>Float</td>
+                <td>Ambient temperature measured in degrees Celsius (°C).</td>
+            </tr>
+            <tr>
+                <td>atmosphere_hpa</td>
+                <td>Float</td>
+                <td>Atmospheric pressure value measured in hectopascals (hPa).</td>
+            </tr>
+            <tr>
+                <td>soil_moisture_percent</td>
+                <td>Float</td>
+                <td>Volumetric water content in the soil expressed as a percentage (0.0 - 100.0).</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="table-title">Success Response (200 OK)</div>
+        <pre><code>{
+  "timestamp": "2026-06-14T06:15:00Z",
+  "temperature_celsius": 25.3,
+  "atmosphere_hpa": 1011.5,
+  "soil_moisture_percent": 45.2
+}</code></pre>
+    </section>
+
+    <section id="post-pump-action">
+        <h2>3. Actuator Control Endpoints</h2>
+        <h3>3.1 Execute Single Manual Watering Task</h3>
+        <p>Triggers the relay board to activate the water pump actuator for a specified duration. The pump automatically switches off when the duration expires.</p>
+
+        <div class="api-endpoint-block">
+            <span class="api-method method-post">POST</span>
+            <span class="api-path">/api/v1/pump/action</span>
+        </div>
+
+        <div class="table-title">Request Body Parameters</div>
+        <table>
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Required</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>action</td>
+                <td>Yes</td>
+                <td>String</td>
+                <td>Must be explicitly set to <code>"run"</code>.</td>
+            </tr>
+            <tr>
+                <td>duration_milliseconds</td>
+                <td>Yes</td>
+                <td>Integer</td>
+                <td>The operational runtime for the water pump in milliseconds.</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="table-title">Success Response (202 Accepted)</div>
+        <pre><code>{
+  "status": "executing",
+  "message": "Pump turned on, will automatically turn off after 5000ms.",
+  "estimated_end_time": "2026-06-14T06:15:05Z"
+}</code></pre>
+
+        <div class="table-title">Error Response (400 Bad Request)</div>
+        <p>Returned if the requested duration exceeds the hardware security thresholds defined within the system configuration.</p>
+        <pre><code>{
+  "error": "EXCEEDS_MAX_DURATION",
+  "message": "Action denied. Duration exceeds the safety threshold specified in configuration."
+}</code></pre>
+    </section>
+
+    <section id="get-pump-status">
+        <h3>3.2 Get Pump Status</h3>
+        <p>Fetches the current real-time electrical state and operational health metrics of the water pump hardware module.</p>
+
+        <div class="api-endpoint-block">
+            <span class="api-method method-get">GET</span>
+            <span class="api-path">/api/v1/pump/status</span>
+        </div>
+
+        <div class="table-title">Success Response (200 OK)</div>
+        <pre><code>{
+  "is_running": false,
+  "last_executed_time": "2026-06-14T03:00:00Z",
+  "last_duration_milliseconds": 4000,
+  "hardware_healthy": true
+}</code></pre>
+    </section>
+
+    <section id="post-pump-stop">
+        <h3>3.3 Emergency Stop Pump</h3>
+        <p>Immediately interrupts the driving power to the water pump hardware, instantly canceling any automated schedules or manual tasks currently executing.</p>
+
+        <div class="api-endpoint-block">
+            <span class="api-method method-post">POST</span>
+            <span class="api-path">/api/v1/pump/stop</span>
+        </div>
+
+        <div class="table-title">Success Response (200 OK)</div>
+        <pre><code>{
+  "status": "stopped",
+  "message": "Pump stopped immediately."
+}</code></pre>
+    </section>
+
+    <section id="post-ai-trigger">
+        <h2>4. AI Analysis &amp; Scheduling Endpoints</h2>
+        <h3>4.1 Manually Trigger AI Analysis</h3>
+        <p>Instructs the backend to immediately gather current physical sensor data and capture a single frame from the live video stream. This unified dataset is compiled and processed by the AI core to recalculate the plant growth status and optimize upcoming irrigation schedules.</p>
+
+        <div class="api-endpoint-block">
+            <span class="api-method method-post">POST</span>
+            <span class="api-path">/api/v1/ai/trigger</span>
+        </div>
+
+        <div class="table-title">Success Response (200 OK)</div>
+        <pre><code>{
+  "triggered_at": "2026-06-14T06:16:00Z",
+  "status": "completed",
+  "ai_decision_summary": "Analysis based on image and physical sensors. Foliage structure appears nominal. Soil moisture at 45.2% is stable. No immediate watering required.",
+  "schedules_updated": true
+}</code></pre>
+    </section>
+
+    <section id="get-schedule-upcoming">
+        <h3>4.2 Get Upcoming Watering Schedule</h3>
+        <p>Returns the queue of planned future watering operations generated through automated cron evaluations or manual AI interventions.</p>
+
+        <div class="api-endpoint-block">
+            <span class="api-method method-get">GET</span>
+            <span class="api-path">/api/v1/schedule/upcoming</span>
+        </div>
+
+        <div class="table-title">Success Response (200 OK)</div>
+        <pre><code>{
+  "generated_at": "2026-06-14T06:16:00Z",
+  "ai_decision_summary": "Soil moisture is declining slowly. Scheduling a maintenance watering session for this evening.",
+  "schedules": [
+    {
+      "schedule_id": "sch_20260614_1800",
+      "planned_time": "2026-06-14T18:00:00Z",
+      "duration_milliseconds": 3500,
+      "executed": false
+    }
+  ]
+}</code></pre>
+    </section>
+
+    <section id="get-schedule-history">
+        <h3>4.3 Get Execution Records and Decision History</h3>
+        <p>Retrieves a paginated collection of historical watering event executions and associated soil telemetry changes.</p>
+
+        <div class="api-endpoint-block">
+            <span class="api-method method-get">GET</span>
+            <span class="api-path">/api/v1/schedule/history</span>
+        </div>
+
+        <div class="table-title">Query Parameters</div>
+        <table>
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>limit</td>
+                <td>Integer</td>
+                <td>10</td>
+                <td>Maximum number of log items to return in the payload.</td>
+            </tr>
+            <tr>
+                <td>offset</td>
+                <td>Integer</td>
+                <td>0</td>
+                <td>The entry index offset position for pagination.</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="table-title">Success Response (200 OK)</div>
+        <pre><code>{
+  "total_records": 12,
+  "records": [
+    {
+      "executed_at": "2026-06-14T00:00:02Z",
+      "trigger_type": "AI_SCHEDULED",
+      "duration_milliseconds": 3500,
+      "status": "SUCCESS",
+      "soil_moisture_before": 38.5,
+      "soil_moisture_after": 52.1
+    }
+  ]
+}</code></pre>
+    </section>
+
+    <section id="get-ai-suggestions">
+        <h3>4.4 Get AI Diagnostics and Suggestions</h3>
+        <p>Provides qualitative maintenance assessments and diagnostic alerts derived purely from camera image analysis (e.g., leaf posture, color patterns) and physical sensor history.</p>
+
+        <div class="api-endpoint-block">
+            <span class="api-method method-get">GET</span>
+            <span class="api-path">/api/v1/ai/suggestions</span>
+        </div>
+
+        <div class="table-title">Success Response (200 OK)</div>
+        <pre><code>{
+  "timestamp": "2026-06-14T06:20:00Z",
+  "suggestions": [
+    {
+      "suggestion_id": "sug_20260614_001",
+      "category": "ENVIRONMENT",
+      "title": "High Ambient Temperature",
+      "description": "Ambient temperature is reaching the upper optimal limit. Monitor closely for signs of leaf wilting.",
+      "priority": "MEDIUM"
+    },
+    {
+      "suggestion_id": "sug_20260614_002",
+      "category": "HEALTH",
+      "title": "Mild Leaf Droop Detected",
+      "description": "Computer vision models indicate slight drooping at leaf margins. Combined with mid-range soil moisture, adjustments to irrigation may be needed soon.",
+      "priority": "LOW"
+    }
+  ]
+}</code></pre>
+    </section>
+
+    <section id="get-system-config">
+        <h2>5. System Configuration Endpoints</h2>
+        <h3>5.1 Get Current System Configuration</h3>
+        <p>Fetches global runtime parameters regulating hardware sampling loops and automated execution parameters.</p>
+
+        <div class="api-endpoint-block">
+            <span class="api-method method-get">GET</span>
+            <span class="api-path">/api/v1/system/config</span>
+        </div>
+
+        <div class="table-title">Success Response (200 OK)</div>
+        <pre><code>{
+  "sensor_read_interval_seconds": 60,
+  "ai_evaluation_cron": "0 8,18 * * *",
+  "safety_max_duration_milliseconds": 15000
+}</code></pre>
+    </section>
+
+    <section id="put-system-config">
+        <h3>5.2 Update System Configuration</h3>
+        <p>Modifies the system operational variables. Supports full or partial updates of the configuration object.</p>
+
+        <div class="api-endpoint-block">
+            <span class="api-method method-put">PUT</span>
+            <span class="api-path">/api/v1/system/config</span>
+        </div>
+
+        <div class="table-title">Request Body Parameters</div>
+        <table>
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Required</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>sensor_read_interval_seconds</td>
+                <td>No</td>
+                <td>Integer</td>
+                <td>Frequency interval for hardware sensor updates.</td>
+            </tr>
+            <tr>
+                <td>ai_evaluation_cron</td>
+                <td>No</td>
+                <td>String</td>
+                <td>Standard crontab string regulating automated AI execution.</td>
+            </tr>
+            <tr>
+                <td>safety_max_duration_milliseconds</td>
+                <td>No</td>
+                <td>Integer</td>
+                <td>Hard threshold preventing excessive manual pump activity.</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="table-title">Success Response (200 OK)</div>
+        <pre><code>{
+  "status": "success",
+  "message": "Configuration updated successfully."
+}</code></pre>
+    </section>
+
+    <section id="get-camera-stream">
+        <h2>6. Camera Streaming Interface</h2>
+        <h3>6.1 Get Live Video Stream</h3>
+        <p>Exposes the continuous video stream generated directly by the hardware camera drivers. Outputs a persistent stream using standard MJPEG format.</p>
+
+        <div class="api-endpoint-block">
+            <span class="api-method method-get">GET</span>
+            <span class="api-path">/api/v1/camera/stream</span>
+        </div>
+
+        <div class="table-title">Response Headers</div>
+        <pre><code>Content-Type: multipart/x-mixed-replace; boundary=frame
+Cache-Control: no-cache, private</code></pre>
+
+        <div class="table-title">Success Response (200 OK)</div>
+        <p>Returns a continuous binary stream of individual JPEG frames separated by the boundary string specified in the header. Web panels can map this endpoint directly into the <code>src</code> attribute of standard <code>&lt;img&gt;</code> elements.</p>
+    </section>
+</div>
+
+<script>
+    const contentSections = document.querySelectorAll("section");
+    const navigationItems = document.querySelectorAll(".sidebar .nav-item");
+
+    window.addEventListener("scroll", function () {
+        let currentSectionId = "";
+        contentSections.forEach(function (section) {
+            const sectionTop = section.offsetTop;
+            if (window.pageYOffset >= sectionTop - 60) {
+                currentSectionId = section.getAttribute("id");
+            }
+        });
+
+        navigationItems.forEach(function (navigationItem) {
+            navigationItem.classList.remove("active");
+            const navigationHref = navigationItem.getAttribute("href");
+            if (navigationHref === "#" + currentSectionId) {
+                navigationItem.classList.add("active");
+            }
+        });
+    });
+
+    navigationItems.forEach(function (navigationItem) {
+        navigationItem.addEventListener("click", function () {
+            navigationItems.forEach(function (item) {
+                item.classList.remove("active");
+            });
+            navigationItem.classList.add("active");
+        });
+    });
+</script>
+</body>
+</html>
