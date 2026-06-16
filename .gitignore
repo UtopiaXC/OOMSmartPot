@@ -33,3 +33,8 @@ bin/
 
 ### Python ###
 **/.venv/
+**/__pycache__/
+
+### Environment ###
+.env
+*.db

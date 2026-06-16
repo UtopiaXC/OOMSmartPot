@@ -276,15 +276,39 @@
 
     <section id="get-sensors-current">
         <h2>2. Sensor Data Endpoints</h2>
-        <h3>2.1 Get Current Sensor Readings</h3>
-        <p>Retrieves the latest physical telemetry data collected from the onboard temperature, atmospheric pressure, and soil moisture hardware modules connected to the Raspberry Pi 4.</p>
+        <h3>2.1 Get Sensor Readings</h3>
+        <p>Retrieves sensor telemetry data. The system automatically collects and stores sensor readings at a configurable interval (default: every 3 seconds). This endpoint supports two modes of operation:</p>
+        <ul>
+            <li><strong>Real-time mode (default):</strong> Without query parameters, returns the latest live reading directly from hardware sensors.</li>
+            <li><strong>Historical mode:</strong> When the <code>start_time</code> parameter is provided, returns all stored historical readings from that timestamp onward.</li>
+        </ul>
 
         <div class="api-endpoint-block">
             <span class="api-method method-get">GET</span>
             <span class="api-path">/api/v1/sensors/current</span>
         </div>
 
-        <div class="table-title">Response Fields</div>
+        <div class="table-title">Query Parameters</div>
+        <table>
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Required</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>start_time</td>
+                <td>No</td>
+                <td>String (ISO 8601)</td>
+                <td>If provided, returns all historical sensor records from this UTC timestamp onward. If omitted, returns the latest real-time reading from hardware.</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="table-title">Response Fields (Single Reading)</div>
         <table>
             <thead>
             <tr>
@@ -317,12 +341,32 @@
             </tbody>
         </table>
 
-        <div class="table-title">Success Response (200 OK)</div>
+        <div class="table-title">Success Response — Real-time Mode (200 OK)</div>
         <pre><code>{
   "timestamp": "2026-06-14T06:15:00Z",
   "temperature_celsius": 25.3,
   "atmosphere_hpa": 1011.5,
   "soil_moisture_percent": 45.2
+}</code></pre>
+
+        <div class="table-title">Success Response — Historical Mode (200 OK)</div>
+        <p>Returned when the <code>start_time</code> query parameter is provided.</p>
+        <pre><code>{
+  "total_records": 120,
+  "records": [
+    {
+      "timestamp": "2026-06-14T06:00:00Z",
+      "temperature_celsius": 24.8,
+      "atmosphere_hpa": 1010.3,
+      "soil_moisture_percent": 48.1
+    },
+    {
+      "timestamp": "2026-06-14T06:00:03Z",
+      "temperature_celsius": 24.9,
+      "atmosphere_hpa": 1010.4,
+      "soil_moisture_percent": 47.8
+    }
+  ]
 }</code></pre>
     </section>
 
@@ -548,7 +592,7 @@
 
         <div class="table-title">Success Response (200 OK)</div>
         <pre><code>{
-  "sensor_read_interval_seconds": 60,
+  "sensor_read_interval_seconds": 3,
   "ai_evaluation_cron": "0 8,18 * * *",
   "safety_max_duration_milliseconds": 15000
 }</code></pre>
@@ -578,7 +622,7 @@
                 <td>sensor_read_interval_seconds</td>
                 <td>No</td>
                 <td>Integer</td>
-                <td>Frequency interval for hardware sensor updates.</td>
+                <td>Interval in seconds for background sensor data collection and storage (default: 3). Changes take effect immediately.</td>
             </tr>
             <tr>
                 <td>ai_evaluation_cron</td>
