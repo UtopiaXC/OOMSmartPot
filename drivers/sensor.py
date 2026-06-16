@@ -19,12 +19,17 @@ def get_sensor_data(command: bytes):
 
     return line
 
+# 0  ~300     dry soil
+# 300~700     humid soil
+# 700~950     in water
 def get_soil_sensor_data():
     return get_sensor_data(b'GETSOIL')
 
+# Returns atmospheric pressure in kilopascals
 def get_pressure_sensor_data():
     return get_sensor_data(b'PRESS')
 
+# Returns temperature in degrees Celsius (°C).
 def get_temperature_sensor_data():
     return get_sensor_data(b'TEMP')
 
