@@ -11,11 +11,14 @@ class CameraDriver:
     def __init__(self):
         self._camera = None
         self._is_real = False
-        self._initialize()
+        self._initialized = False
 
     def _initialize(self):
+        if self._initialized:
+            return
+        self._initialized = True
         try:
-            self._camera = cv2.VideoCapture(0)
+            self._camera = cv2.VideoCapture('/dev/video0', cv2.CAP_V4L2)
             if self._camera.isOpened():
                 self._is_real = True
                 logger.info("Camera initialized with cv2")
@@ -29,9 +32,11 @@ class CameraDriver:
 
     @property
     def is_real_hardware(self) -> bool:
+        self._initialize()
         return self._is_real
 
     def capture_jpeg(self) -> bytes:
+        self._initialize()
         if self._is_real:
             if self._camera is not None:
                 capture_success, frame_data = self._camera.read()
@@ -84,7 +89,7 @@ class CameraDriver:
 
     async def generate_mjpeg_stream(self):
         while True:
-            frame_bytes = self.capture_jpeg()
+            frame_bytes = await asyncio.to_thread(self.capture_jpeg)
             yield (
                 b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n'
