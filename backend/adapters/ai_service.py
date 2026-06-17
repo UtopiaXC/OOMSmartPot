@@ -57,7 +57,7 @@ Sensor data provided:
 When analyzing, consider:
 1. Optimal soil moisture for most houseplants: 40-60%
 2. Temperature stress thresholds: below 10°C or above 35°C
-3. If an image is provided, assess leaf color, drooping, discoloration, pests
+3. If an image is provided, assess leaf color, drooping, discoloration, pests. And conclusion must contains the analyzation of the image.
 4. Recommend watering only if soil moisture is below 40% or plant shows stress signs
 """
 

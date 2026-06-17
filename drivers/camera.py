@@ -48,6 +48,16 @@ class CameraDriver:
         return self._generate_placeholder_jpeg()
 
     def _generate_placeholder_jpeg(self) -> bytes:
+        import os
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        image_path = os.path.join(current_dir, "test_image.png")
+        try:
+            with open(image_path, "rb") as f:
+                return f.read()
+        except Exception as e:
+            logger.error(f"Failed to load {image_path}: {e}")
+            
+        # Fallback to generated image
         placeholder_image = numpy.zeros((480, 640, 3), dtype=numpy.uint8)
         placeholder_image[:] = (34, 139, 34)
         
@@ -75,7 +85,6 @@ class CameraDriver:
         encode_success, buffer_data = cv2.imencode('.jpg', placeholder_image)
         if encode_success:
             return buffer_data.tobytes()
-            
         return (
             b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x01\x00`\x00`\x00\x00'
             b'\xff\xdb\x00C\x00\x08\x06\x06\x07\x06\x05\x08\x07\x07\x07\t\t'

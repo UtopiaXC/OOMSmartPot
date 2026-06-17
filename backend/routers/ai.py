@@ -27,12 +27,14 @@ async def manually_trigger_ai_analysis(db: Session = Depends(get_db)):
     atmosphere = hardware_adapter.read_atmosphere()
     soil_moisture = hardware_adapter.read_soil_moisture()
 
+
     # 2. Capture camera snapshot
     image_jpeg = None
+
     try:
         image_jpeg = hardware_adapter.capture_snapshot_jpeg()
     except Exception:
-        pass  # Proceed without image
+        pass
 
     # 3. Run AI analysis
     result = analyze_plant(temperature, atmosphere, soil_moisture, image_jpeg)
