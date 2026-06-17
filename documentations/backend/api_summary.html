@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Planter API Summary</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333333;
+        }
+        .summary-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        h1 {
+            font-size: 24px;
+            color: #202124;
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e8eaed;
+            padding-bottom: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #dadce0;
+            padding: 14px 16px;
+            text-align: left;
+            font-size: 14px;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #202124;
+        }
+        td {
+            color: #3c4043;
+            vertical-align: middle;
+        }
+        .nav-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #ffffff;
+            text-transform: uppercase;
+            display: inline-block;
+            width: 45px;
+            text-align: center;
+        }
+        .badge-get { background-color: #1e8e3e; }
+        .badge-post { background-color: #1a73e8; }
+        .badge-put { background-color: #f9ab00; }
+        .api-path {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 14px;
+            font-weight: 600;
+            color: #202124;
+            background-color: #f1f3f4;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .group-label {
+            font-weight: 600;
+            color: #5f6368;
+        }
+    </style>
+</head>
+<body>
+    <div class="summary-container">
+        <h1>Smart Planter API Summary</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Group</th>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="group-label">Sensors</td>
+                    <td><span class="nav-badge badge-get">GET</span></td>
+                    <td><span class="api-path">/api/v1/sensors/current</span></td>
+                    <td>Retrieve current or historical sensor telemetry data.</td>
+                </tr>
+                <tr>
+                    <td class="group-label">Actuator Control</td>
+                    <td><span class="nav-badge badge-post">POST</span></td>
+                    <td><span class="api-path">/api/v1/pump/action</span></td>
+                    <td>Execute a single manual watering task for a specified duration.</td>
+                </tr>
+                <tr>
+                    <td class="group-label">Actuator Control</td>
+                    <td><span class="nav-badge badge-get">GET</span></td>
+                    <td><span class="api-path">/api/v1/pump/status</span></td>
+                    <td>Fetch current real-time electrical state and operational health metrics.</td>
+                </tr>
+                <tr>
+                    <td class="group-label">Actuator Control</td>
+                    <td><span class="nav-badge badge-post">POST</span></td>
+                    <td><span class="api-path">/api/v1/pump/stop</span></td>
+                    <td>Immediately interrupt driving power to the water pump.</td>
+                </tr>
+                <tr>
+                    <td class="group-label">AI &amp; Schedule</td>
+                    <td><span class="nav-badge badge-post">POST</span></td>
+                    <td><span class="api-path">/api/v1/ai/trigger</span></td>
+                    <td>Manually trigger AI analysis using current physical sensor data and camera frame.</td>
+                </tr>
+                <tr>
+                    <td class="group-label">AI &amp; Schedule</td>
+                    <td><span class="nav-badge badge-get">GET</span></td>
+                    <td><span class="api-path">/api/v1/schedule/upcoming</span></td>
+                    <td>Return the queue of planned future watering operations.</td>
+                </tr>
+                <tr>
+                    <td class="group-label">AI &amp; Schedule</td>
+                    <td><span class="nav-badge badge-get">GET</span></td>
+                    <td><span class="api-path">/api/v1/schedule/history</span></td>
+                    <td>Retrieve a paginated collection of historical watering event executions.</td>
+                </tr>
+                <tr>
+                    <td class="group-label">AI &amp; Schedule</td>
+                    <td><span class="nav-badge badge-get">GET</span></td>
+                    <td><span class="api-path">/api/v1/ai/suggestions</span></td>
+                    <td>Provide qualitative maintenance assessments and diagnostic alerts.</td>
+                </tr>
+                <tr>
+                    <td class="group-label">Configuration</td>
+                    <td><span class="nav-badge badge-get">GET</span></td>
+                    <td><span class="api-path">/api/v1/system/config</span></td>
+                    <td>Fetch global runtime parameters regulating hardware sampling loops.</td>
+                </tr>
+                <tr>
+                    <td class="group-label">Configuration</td>
+                    <td><span class="nav-badge badge-put">PUT</span></td>
+                    <td><span class="api-path">/api/v1/system/config</span></td>
+                    <td>Modify system operational variables (sensor intervals, cron, safety thresholds).</td>
+                </tr>
+                <tr>
+                    <td class="group-label">Camera Stream</td>
+                    <td><span class="nav-badge badge-get">GET</span></td>
+                    <td><span class="api-path">/api/v1/camera/stream</span></td>
+                    <td>Get live continuous video stream in standard MJPEG format.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
