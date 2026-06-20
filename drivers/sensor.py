@@ -32,7 +32,7 @@ def get_pressure_sensor_data():
 # Returns temperature in degrees Celsius (°C).
 def get_temperature_sensor_data():
     raw_temp = float(get_sensor_data(b'TEMP'))
-    return str(77 - raw_temp)
+    return str(raw_temp)
 
 if __name__ == '__main__':
     while True:

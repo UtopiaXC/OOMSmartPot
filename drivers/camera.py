@@ -44,8 +44,8 @@ class CameraDriver:
                     encode_success, buffer_data = cv2.imencode('.jpg', frame_data)
                     if encode_success:
                         return buffer_data.tobytes()
-        
-        return self._generate_placeholder_jpeg()
+                raise RuntimeError("Failed to capture frame from camera")
+        raise RuntimeError("Camera driver is not running on real hardware")
 
     def _generate_placeholder_jpeg(self) -> bytes:
         import os

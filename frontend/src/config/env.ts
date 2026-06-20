@@ -20,7 +20,7 @@ export const config: AppConfig = {
    * as sensors/camera. Tests override this with '' so MSW intercepts relative paths.
    */
   API_BASE_URL:
-    import.meta.env.VITE_API_BASE_URL ?? "http://192.168.11.149:8000/api/v1",
+    import.meta.env.VITE_API_BASE_URL ?? "http://192.168.2.141:8000/api/v1",
 
   /**
    * Base URL for the OOMSmartPot sensor API. Points at the live test server by
@@ -28,7 +28,7 @@ export const config: AppConfig = {
    * mock this host), so the dashboard shows live data out of the box.
    */
   SENSORS_BASE_URL:
-    import.meta.env.VITE_SENSORS_BASE_URL ?? "http://192.168.11.149:8000/api/v1",
+    import.meta.env.VITE_SENSORS_BASE_URL ?? "http://192.168.2.141:8000/api/v1",
 
   /**
    * MJPEG camera stream URL (multipart/x-mixed-replace). Pulled via fetch and
@@ -37,7 +37,7 @@ export const config: AppConfig = {
    */
   CAMERA_STREAM_URL:
     import.meta.env.VITE_CAMERA_STREAM_URL ??
-    "http://192.168.11.149:8000/api/v1/camera/stream",
+    "http://192.168.2.141:8000/api/v1/camera/stream",
 
   /**
    * Max frames/second the camera canvas decodes & paints. The live feed pushes
