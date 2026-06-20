@@ -42,6 +42,10 @@ async def lifespan(app: FastAPI):
     init_db()
     logger.info("Database initialized")
 
+    # Initialize hardware connections only inside the running worker process
+    from adapters.hardware import hardware_adapter
+    hardware_adapter.initialize()
+
     # Start background scheduler
     from adapters.scheduler import start_scheduler, shutdown_scheduler
     db = SessionLocal()

@@ -110,14 +110,26 @@ class HardwareDriverAdapter:
         self._last_duration_milliseconds = 0
         self._hardware_healthy = True
 
-        # -- Initialize sensor adapter --
-        self._sensor = self._init_sensor()
+        # -- Lazy initialization placeholders --
+        self._sensor = None
+        self._pump = None
+        self._camera = None
 
-        # -- Initialize pump adapter --
-        self._pump = self._init_pump()
+    def initialize(self):
+        """Initialize the hardware adapters explicitly."""
+        logger.info("Initializing hardware connections...")
+        if self._sensor is None:
+            self._sensor = self._init_sensor()
+        if self._pump is None:
+            self._pump = self._init_pump()
+        if self._camera is None:
+            self._camera = self._init_camera()
+        logger.info("Hardware connections initialized successfully.")
 
-        # -- Initialize camera --
-        self._camera = self._init_camera()
+    def _ensure_initialized(self):
+        """Ensure hardware adapters are initialized lazily if accessed."""
+        if self._sensor is None or self._pump is None or self._camera is None:
+            self.initialize()
 
     def _init_sensor(self):
         """Initialize sensor adapter using the official driver."""
@@ -142,17 +154,21 @@ class HardwareDriverAdapter:
     # ---- Sensor interface ----
 
     def read_temperature(self) -> float:
+        self._ensure_initialized()
         return self._sensor.read_temperature()
 
     def read_atmosphere(self) -> float:
+        self._ensure_initialized()
         return self._sensor.read_atmosphere()
 
     def read_soil_moisture(self) -> float:
+        self._ensure_initialized()
         return self._sensor.read_soil_moisture()
 
     # ---- Pump interface ----
 
     def set_pump_state(self, state: bool):
+        self._ensure_initialized()
         self._pump_is_running = state
         if state:
             self._pump.turn_on()
@@ -179,10 +195,12 @@ class HardwareDriverAdapter:
 
     def capture_snapshot_jpeg(self) -> bytes:
         """Capture a single JPEG frame from the camera."""
+        self._ensure_initialized()
         return self._camera.capture_jpeg()
 
     async def get_video_stream_frame(self):
         """Yield MJPEG frames for streaming."""
+        self._ensure_initialized()
         async for frame in self._camera.generate_mjpeg_stream():
             yield frame
 
@@ -190,9 +208,12 @@ class HardwareDriverAdapter:
 
     def cleanup(self):
         """Release all hardware resources."""
-        self._sensor.close()
-        self._pump.cleanup()
-        self._camera.close()
+        if self._sensor is not None:
+            self._sensor.close()
+        if self._pump is not None:
+            self._pump.cleanup()
+        if self._camera is not None:
+            self._camera.close()
         logger.info("Hardware resources released")
 
 
