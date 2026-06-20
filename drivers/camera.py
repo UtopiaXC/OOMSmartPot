@@ -18,13 +18,19 @@ class CameraDriver:
             return
         self._initialized = True
         try:
-            self._camera = cv2.VideoCapture('/dev/video0', cv2.CAP_V4L2)
+            # Try index 0 as integer (preferred for V4L2 to avoid 'capture by name' warning)
+            self._camera = cv2.VideoCapture(0, cv2.CAP_V4L2)
+            if not self._camera.isOpened():
+                self._camera = cv2.VideoCapture(0)
+            if not self._camera.isOpened():
+                self._camera = cv2.VideoCapture('/dev/video0', cv2.CAP_V4L2)
+                
             if self._camera.isOpened():
                 self._is_real = True
                 logger.info("Camera initialized with cv2")
             else:
                 self._is_real = False
-                logger.warning("Camera failed to open, using placeholder")
+                logger.warning("Camera failed to open")
         except Exception as exception_instance:
             logger.warning(f"Failed to initialize cv2 camera: {exception_instance}")
             self._camera = None
