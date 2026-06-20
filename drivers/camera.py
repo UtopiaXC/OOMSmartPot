@@ -18,19 +18,30 @@ class CameraDriver:
             return
         self._initialized = True
         try:
-            # Try index 0 as integer (preferred for V4L2 to avoid 'capture by name' warning)
-            self._camera = cv2.VideoCapture(0, cv2.CAP_V4L2)
-            if not self._camera.isOpened():
-                self._camera = cv2.VideoCapture(0)
-            if not self._camera.isOpened():
-                self._camera = cv2.VideoCapture('/dev/video0', cv2.CAP_V4L2)
+            # Try multiple indexes (on Raspberry Pi, index 0 is sometimes metadata, while 2 or 4 is the real camera stream)
+            for idx in [0, 2, 4, 1, 3]:
+                # Try with CAP_V4L2 first
+                self._camera = cv2.VideoCapture(idx, cv2.CAP_V4L2)
+                if not self._camera.isOpened():
+                    # Try default backend
+                    self._camera = cv2.VideoCapture(idx)
                 
-            if self._camera.isOpened():
-                self._is_real = True
-                logger.info("Camera initialized with cv2")
-            else:
-                self._is_real = False
-                logger.warning("Camera failed to open")
+                if self._camera.isOpened():
+                    self._is_real = True
+                    logger.info(f"Camera initialized successfully with cv2 on index {idx}")
+                    break
+                else:
+                    self._camera = None
+            
+            if not self._is_real:
+                # Last resort fallback: try by string name
+                self._camera = cv2.VideoCapture('/dev/video0', cv2.CAP_V4L2)
+                if self._camera.isOpened():
+                    self._is_real = True
+                    logger.info("Camera initialized successfully with cv2 on /dev/video0")
+                else:
+                    self._camera = None
+                    logger.warning("Camera failed to open on any index/path")
         except Exception as exception_instance:
             logger.warning(f"Failed to initialize cv2 camera: {exception_instance}")
             self._camera = None
