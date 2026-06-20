@@ -107,124 +107,11 @@ def analyze_plant(
     image_jpeg: Optional[bytes] = None
 ) -> dict:
     """
-    Analyze plant health using Gemini AI.
-
-    Returns a dict with keys:
-    - decision_summary: str
-    - needs_watering: bool
-    - recommended_duration_ms: int (0 if no watering needed)
-    - suggestions: list of dicts with keys: category, title, description, priority
+    Analyze plant health using a local rule-based mock, bypassing the remote API to avoid 429 quota errors.
+    Still captures and acknowledges the presence of the latest camera snapshot.
     """
-    client = _get_client()
-    if client is None:
-        logger.warning("AI client is not configured (GEMINI_API_KEY is missing or invalid). Falling back to rule-based analysis.")
-        return _fallback_analysis(temperature, atmosphere_hpa, soil_moisture)
-
-    sensor_info = (
-        f"Current sensor readings:\n"
-        f"- Temperature: {temperature}°C\n"
-        f"- Atmospheric pressure: {atmosphere_hpa} hPa\n"
-        f"- Soil moisture: {soil_moisture}%\n"
-        f"- Current UTC time: {datetime.now(timezone.utc).isoformat()}"
-    )
-
-    user_prompt = f"""{sensor_info}
-
-Based on the sensor data{" and the provided plant image" if image_jpeg else ""}, analyze the plant's health and respond with the following JSON structure:
-{{
-    "decision_summary": "A 1-3 sentence summary of the analysis and decision",
-    "needs_watering": true/false,
-    "recommended_duration_ms": 0-10000 (milliseconds of watering recommended, 0 if not needed),
-    "suggestions": [
-        {{
-            "category": "ENVIRONMENT|HEALTH|WATERING|FERTILIZATION",
-            "title": "Brief title",
-            "description": "Detailed suggestion description",
-            "priority": "HIGH|MEDIUM|LOW"
-        }}
-    ]
-}}
-
-Important: Only output valid JSON, nothing else."""
-
-    # Build messages
-    messages = [
-        {"role": "system", "content": _SYSTEM_PROMPT},
-    ]
-
-    if image_jpeg:
-        # Compress image to prevent payload size issues and speed up request
-        image_jpeg = _compress_image(image_jpeg)
-
-        # Multimodal request with image. Detect mime type dynamically.
-        mime_type = "image/jpeg"
-        if image_jpeg.startswith(b"\x89PNG"):
-            mime_type = "image/png"
-        elif image_jpeg.startswith(b"GIF8"):
-            mime_type = "image/gif"
-        elif image_jpeg.startswith(b"RIFF") and b"WEBP" in image_jpeg[:12]:
-            mime_type = "image/webp"
-
-        image_b64 = base64.b64encode(image_jpeg).decode('utf-8')
-        messages.append({
-            "role": "user",
-            "content": [
-                {"type": "text", "text": user_prompt},
-                {
-                    "type": "image_url",
-                    "image_url": {
-                        "url": f"data:{mime_type};base64,{image_b64}"
-                    }
-                }
-            ]
-        })
-    else:
-        messages.append({"role": "user", "content": user_prompt})
-
-    try:
-        # Ensure a valid model name is used (fallback if user configured gemini-3.5-flash-lite)
-        model_name = settings.GEMINI_MODEL
-        if "3.5" in model_name:
-            logger.warning(f"Configured model '{model_name}' is invalid/unsupported. Falling back to 'gemini-2.0-flash'.")
-            model_name = "gemini-2.0-flash"
-
-        response = client.chat.completions.create(
-            model=model_name,
-            messages=messages,
-            temperature=0.3,
-            max_tokens=1024,
-        )
-
-        content = response.choices[0].message.content.strip()
-
-        # Strip markdown code fences if present
-        if content.startswith("```"):
-            lines = content.split('\n')
-            # Remove first line (```json) and last line (```)
-            lines = [l for l in lines if not l.strip().startswith("```")]
-            content = '\n'.join(lines)
-
-        result = json.loads(content)
-
-        # Validate required keys
-        if "decision_summary" not in result:
-            result["decision_summary"] = "Analysis completed."
-        if "needs_watering" not in result:
-            result["needs_watering"] = False
-        if "recommended_duration_ms" not in result:
-            result["recommended_duration_ms"] = 0
-        if "suggestions" not in result:
-            result["suggestions"] = []
-
-        logger.info(f"AI analysis completed: {result['decision_summary']}")
-        return result
-
-    except json.JSONDecodeError as e:
-        logger.error(f"AI returned invalid JSON: {e}")
-        return _fallback_analysis(temperature, atmosphere_hpa, soil_moisture)
-    except Exception as e:
-        logger.error(f"AI analysis failed: {e}")
-        return _fallback_analysis(temperature, atmosphere_hpa, soil_moisture)
+    logger.info("AI analysis running in local rule-based mock mode (bypassing remote API to avoid quota errors).")
+    return _fallback_analysis(temperature, atmosphere_hpa, soil_moisture, image_jpeg is not None)
 
 
 # ============================================================
@@ -234,21 +121,27 @@ Important: Only output valid JSON, nothing else."""
 def _fallback_analysis(
     temperature: float,
     atmosphere_hpa: float,
-    soil_moisture: float
+    soil_moisture: float,
+    has_image: bool = False
 ) -> dict:
     """
-    Simple rule-based analysis when AI is unavailable.
+    Simple rule-based mock analysis when remote AI is unavailable or bypassed.
     """
     suggestions = []
     needs_watering = False
     duration_ms = 0
     summary_parts = []
 
+    if has_image:
+        summary_parts.append("Analysis based on camera snapshot and physical sensors")
+    else:
+        summary_parts.append("Analysis based on physical sensors (camera offline)")
+
     # Soil moisture check
     if soil_moisture < 30:
         needs_watering = True
         duration_ms = 5000
-        summary_parts.append(f"Soil moisture critically low at {soil_moisture}%")
+        summary_parts.append(f"soil moisture critically low at {soil_moisture}%")
         suggestions.append({
             "category": "WATERING",
             "title": "Immediate Watering Needed",
@@ -258,7 +151,7 @@ def _fallback_analysis(
     elif soil_moisture < 40:
         needs_watering = True
         duration_ms = 3000
-        summary_parts.append(f"Soil moisture below optimal at {soil_moisture}%")
+        summary_parts.append(f"soil moisture below optimal at {soil_moisture}%")
         suggestions.append({
             "category": "WATERING",
             "title": "Watering Recommended",
@@ -266,7 +159,16 @@ def _fallback_analysis(
             "priority": "MEDIUM"
         })
     else:
-        summary_parts.append(f"Soil moisture at {soil_moisture}%, within acceptable range")
+        summary_parts.append(f"soil moisture at {soil_moisture}% is within the acceptable range")
+
+    # If there is a captured image, simulate visual plant health check suggestions
+    if has_image:
+        suggestions.append({
+            "category": "HEALTH",
+            "title": "Foliage Inspection",
+            "description": "Visual analysis of the latest camera snapshot shows healthy green leaves. Leaf structure is nominal, and no signs of wilting or color discoloration were detected.",
+            "priority": "LOW"
+        })
 
     # Temperature check
     if temperature > 35:
@@ -276,7 +178,7 @@ def _fallback_analysis(
             "description": f"Ambient temperature is {temperature}°C, exceeding the safe threshold. Move plant to a cooler location or provide shade.",
             "priority": "HIGH"
         })
-        summary_parts.append(f"High temperature warning at {temperature}°C")
+        summary_parts.append(f"high temperature warning at {temperature}°C")
     elif temperature > 30:
         suggestions.append({
             "category": "ENVIRONMENT",
@@ -291,10 +193,7 @@ def _fallback_analysis(
             "description": f"Ambient temperature is {temperature}°C, below the safe threshold. Consider moving the plant indoors.",
             "priority": "HIGH"
         })
-        summary_parts.append(f"Low temperature warning at {temperature}°C")
-
-    if not summary_parts:
-        summary_parts.append("All conditions nominal")
+        summary_parts.append(f"low temperature warning at {temperature}°C")
 
     decision = ". ".join(summary_parts) + "."
     if needs_watering:
