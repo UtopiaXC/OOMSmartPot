@@ -83,6 +83,7 @@ def analyze_plant(
     """
     client = _get_client()
     if client is None:
+        logger.warning("AI client is not configured (GEMINI_API_KEY is missing or invalid). Falling back to rule-based analysis.")
         return _fallback_analysis(temperature, atmosphere_hpa, soil_moisture)
 
     sensor_info = (
@@ -118,7 +119,15 @@ Important: Only output valid JSON, nothing else."""
     ]
 
     if image_jpeg:
-        # Multimodal request with image
+        # Multimodal request with image. Detect mime type dynamically.
+        mime_type = "image/jpeg"
+        if image_jpeg.startswith(b"\x89PNG"):
+            mime_type = "image/png"
+        elif image_jpeg.startswith(b"GIF8"):
+            mime_type = "image/gif"
+        elif image_jpeg.startswith(b"RIFF") and b"WEBP" in image_jpeg[:12]:
+            mime_type = "image/webp"
+
         image_b64 = base64.b64encode(image_jpeg).decode('utf-8')
         messages.append({
             "role": "user",
@@ -127,7 +136,7 @@ Important: Only output valid JSON, nothing else."""
                 {
                     "type": "image_url",
                     "image_url": {
-                        "url": f"data:image/jpeg;base64,{image_b64}"
+                        "url": f"data:{mime_type};base64,{image_b64}"
                     }
                 }
             ]

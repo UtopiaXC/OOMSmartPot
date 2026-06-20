@@ -53,10 +53,13 @@ class CameraDriver:
         current_dir = os.path.dirname(os.path.abspath(__file__))
         image_path = os.path.join(current_dir, "test_image.png")
         try:
-            with open(image_path, "rb") as f:
-                return f.read()
+            img = cv2.imread(image_path)
+            if img is not None:
+                encode_success, buffer_data = cv2.imencode('.jpg', img)
+                if encode_success:
+                    return buffer_data.tobytes()
         except Exception as e:
-            logger.error(f"Failed to load {image_path}: {e}")
+            logger.error(f"Failed to load and convert {image_path} to JPEG: {e}")
             
         # Fallback to generated image
         placeholder_image = numpy.zeros((480, 640, 3), dtype=numpy.uint8)
