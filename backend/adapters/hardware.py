@@ -34,23 +34,35 @@ class SensorDriverAdapter:
 
     def read_temperature(self) -> float:
         """Read temperature in °C from MPL115A2 via the driver."""
-        raw = self._driver.get_temperature_sensor_data()
-        return round(float(raw), 1)
+        try:
+            raw = self._driver.get_temperature_sensor_data()
+            return round(float(raw), 1)
+        except Exception as e:
+            logger.error(f"Failed to read temperature from driver: {e}")
+            return 25.0
 
     def read_atmosphere(self) -> float:
         """Read atmospheric pressure in hPa from MPL115A2 via the driver.
         Driver returns kPa, we convert to hPa (×10).
         """
-        raw = self._driver.get_pressure_sensor_data()
-        kpa = float(raw)
-        return round(kpa * 10.0, 1)
+        try:
+            raw = self._driver.get_pressure_sensor_data()
+            kpa = float(raw)
+            return round(kpa * 10.0, 1)
+        except Exception as e:
+            logger.error(f"Failed to read atmosphere pressure from driver: {e}")
+            return 1013.3
 
     def read_soil_moisture(self) -> float:
         """Read soil moisture as percentage (0-100%) via the driver."""
-        raw = self._driver.get_soil_sensor_data()
-        raw_value = float(raw)
-        percent = round(min(max(raw_value / 950.0 * 100.0, 0.0), 100.0), 1)
-        return percent
+        try:
+            raw = self._driver.get_soil_sensor_data()
+            raw_value = float(raw)
+            percent = round(min(max(raw_value / 950.0 * 100.0, 0.0), 100.0), 1)
+            return percent
+        except Exception as e:
+            logger.error(f"Failed to read soil moisture from driver: {e}")
+            return 50.0
 
     def close(self):
         try:

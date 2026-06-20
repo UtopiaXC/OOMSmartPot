@@ -8,16 +8,21 @@ serial_hz = 9600
 ser = serial.Serial(arduino_port, serial_hz, timeout=1)
 ser.reset_input_buffer()
 
-def get_sensor_data(command: bytes):
-    # 写命令 + 换行
-    ser.write(command + b'\n')
-
-    # 读取一行（最多等 timeout 秒）
-    line = ser.readline().decode('utf-8').strip()
-    if not line:
-        return get_sensor_data(command) 
-
-    return line
+def get_sensor_data(command: bytes, retries: int = 3):
+    for i in range(retries):
+        try:
+            # Clear input buffer first
+            ser.reset_input_buffer()
+            # Send command
+            ser.write(command + b'\n')
+            # Read response
+            line = ser.readline().decode('utf-8').strip()
+            if line:
+                return line
+        except Exception as e:
+            if i == retries - 1:
+                raise e
+    raise RuntimeError(f"No response from Arduino for command: {command.decode()}")
 
 # 0  ~300     dry soil
 # 300~700     humid soil
