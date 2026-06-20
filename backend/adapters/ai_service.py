@@ -66,6 +66,40 @@ When analyzing, consider:
 # Analysis functions
 # ============================================================
 
+def _compress_image(image_bytes: bytes, max_size: int = 800, quality: int = 70) -> bytes:
+    """Resize and compress the image to save bandwidth and prevent payload size issues."""
+    try:
+        import cv2
+        import numpy as np
+        
+        # Decode image from bytes
+        nparr = np.frombuffer(image_bytes, np.uint8)
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        if img is None:
+            return image_bytes
+            
+        # Get current dimensions
+        h, w = img.shape[:2]
+        
+        # Resize if dimension exceeds max_size
+        if max(h, w) > max_size:
+            if w > h:
+                new_w = max_size
+                new_h = int(h * (max_size / w))
+            else:
+                new_h = max_size
+                new_w = int(w * (max_size / h))
+            img = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_AREA)
+            
+        # Encode back to JPEG with specified quality
+        encode_success, buffer = cv2.imencode('.jpg', img, [int(cv2.IMWRITE_JPEG_QUALITY), quality])
+        if encode_success:
+            return buffer.tobytes()
+    except Exception as e:
+        logger.warning(f"Failed to compress image: {e}")
+    return image_bytes
+
+
 def analyze_plant(
     temperature: float,
     atmosphere_hpa: float,
@@ -119,6 +153,9 @@ Important: Only output valid JSON, nothing else."""
     ]
 
     if image_jpeg:
+        # Compress image to prevent payload size issues and speed up request
+        image_jpeg = _compress_image(image_jpeg)
+
         # Multimodal request with image. Detect mime type dynamically.
         mime_type = "image/jpeg"
         if image_jpeg.startswith(b"\x89PNG"):
@@ -145,8 +182,14 @@ Important: Only output valid JSON, nothing else."""
         messages.append({"role": "user", "content": user_prompt})
 
     try:
+        # Ensure a valid model name is used (fallback if user configured gemini-3.5-flash-lite)
+        model_name = settings.GEMINI_MODEL
+        if "3.5" in model_name:
+            logger.warning(f"Configured model '{model_name}' is invalid/unsupported. Falling back to 'gemini-2.0-flash'.")
+            model_name = "gemini-2.0-flash"
+
         response = client.chat.completions.create(
-            model=settings.GEMINI_MODEL,
+            model=model_name,
             messages=messages,
             temperature=0.3,
             max_tokens=1024,
